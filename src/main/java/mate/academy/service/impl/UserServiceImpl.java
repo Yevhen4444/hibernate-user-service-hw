@@ -1,5 +1,6 @@
 package mate.academy.service.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -22,6 +23,7 @@ public class UserServiceImpl implements UserService {
         user.setSalt(salt);
         String hashedPassword = hashPassword(user.getPassword(), salt);
         user.setPassword(hashedPassword);
+
         return userDao.add(user);
     }
 
@@ -32,14 +34,14 @@ public class UserServiceImpl implements UserService {
 
     private String hashPassword(String password, byte[] salt) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(salt);
-            byte[] hashedBytes = md.digest(password.getBytes());
-            StringBuilder sb = new StringBuilder();
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update(salt);
+            byte[] hashedBytes = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
             for (byte b : hashedBytes) {
-                sb.append(String.format("%02x", b));
+                hexString.append(String.format("%02x", b));
             }
-            return sb.toString();
+            return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }

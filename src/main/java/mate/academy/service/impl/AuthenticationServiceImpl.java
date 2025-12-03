@@ -3,7 +3,6 @@ package mate.academy.service.impl;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Optional;
 import mate.academy.exception.AuthenticationException;
 import mate.academy.exception.RegistrationException;
@@ -39,7 +38,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if (userOptional.isEmpty()
                 || !hashPassword(password, userOptional.get().getSalt())
-                        .equals(userOptional.get().getPassword())) {
+                .equals(userOptional.get().getPassword())) {
             throw new AuthenticationException("Incorrect email or password");
         }
 
@@ -51,13 +50,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (userService.findByEmail(email).isPresent()) {
             throw new RegistrationException("User with email " + email + " already exists");
         }
-        byte[] salt = new byte[16];
-        new SecureRandom().nextBytes(salt);
-        String hashedPassword = hashPassword(password, salt);
         User user = new User();
         user.setEmail(email);
-        user.setSalt(salt);
-        user.setPassword(hashedPassword);
+        user.setPassword(password);
         return userService.add(user);
     }
 }
